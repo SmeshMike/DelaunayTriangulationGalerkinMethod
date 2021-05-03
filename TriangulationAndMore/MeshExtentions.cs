@@ -122,6 +122,32 @@ namespace TriangulationAndMore
             return wireframe;
         }
 
+
+        public static MeshGeometry3D ToLineframe(this MeshGeometry3D mesh, double thickness)
+        {
+            // Make a dictionary in case triangles share segments
+            // so we don't draw the same segment twice.
+            Dictionary<int, int> already_drawn = new Dictionary<int, int>();
+
+            // Make a mesh to hold the wireframe.
+            MeshGeometry3D wireframe = new MeshGeometry3D();
+
+            // Loop through the mesh's triangles.
+            for (int triangle = 0; triangle < mesh.TriangleIndices.Count; triangle += 3)
+            {
+                // Get the triangle's corner indices.
+                int index1 = mesh.TriangleIndices[triangle];
+                int index2 = mesh.TriangleIndices[triangle + 1];
+
+                // Make the triangle's three segments.
+                AddTriangleSegment(mesh, wireframe, already_drawn, index1, index2, thickness);
+            }
+
+            return wireframe;
+        }
+
+
+
         // Add the triangle's three segments to the wireframe mesh.
         private static void AddTriangleSegment(MeshGeometry3D mesh,
             MeshGeometry3D wireframe, Dictionary<int, int> already_drawn,

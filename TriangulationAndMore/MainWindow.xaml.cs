@@ -22,8 +22,13 @@ namespace TriangulationAndMore
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+    ///
+    
+
     public partial class MainWindow : Window
     {
+        private PointsProcessing delaunay = new PointsProcessing();
+
         private GeometryModel3D SurfaceModel;
         private Model3DGroup MainModel3Dgroup = new Model3DGroup();
         // The wireframe's model.
@@ -46,13 +51,9 @@ namespace TriangulationAndMore
         private double CameraTheta = Math.PI / 6.0;// 30 degrees
         private double CameraR = 190.0;
 
-        const double xmin = 0;
-        const double xmax = 50;
-        const double dx = 1;
-        const double zmin = 0;
-        const double zmax = 50;
-        const double dz = 1;
-
+        const double xmax = 2;
+        const double zmax = 2;
+ 
         public MainWindow()
         {
             InitializeComponent();
@@ -72,9 +73,6 @@ namespace TriangulationAndMore
 
             // Define lights.
             DefineLights();
-            PointsProcessing pp = new PointsProcessing();
-            triangle = pp.GenerateTriangles(xmin, xmax, zmin, zmax, _pointsCount);
-            points = pp.points;
             // Create the model.
             DefineModel(MainModel3Dgroup);
 
@@ -92,30 +90,16 @@ namespace TriangulationAndMore
             MeshGeometry3D mesh = new MeshGeometry3D();
 
 
-            //for (double x = xmin; x <= xmax - dx; x += dx)
-            //{
-            //    for (double z = zmin; z <= zmax - dz; z += dx)
-            //    {
-            //        // Make points at the corners of the surface
-            //        // over (x, z) - (x + dx, z + dz).
-            //        Point3D p00 = new Point3D(x, 0, z);
-            //        Point3D p10 = new Point3D(x + dx, 0, z);
-            //        Point3D p01 = new Point3D(x, 0, z + dz);
-            //        Point3D p11 = new Point3D(x + dx, 0, z + dz);
+            var points = delaunay.GeneratePoints(xmax, zmax,10);
 
-            //        // Add the triangles.
-            //        AddTriangle(mesh, p00, p01, p11);
-            //        AddTriangle(mesh, p00, p11, p10);
-            //    }
-            //}
+            var triangulation = delaunay.BowyerWatson(points);
+            var edges = new List<Edge>();
 
-            for (int i = 0; i < triangle.Count; i++)
+            foreach (var triangle in triangulation)
             {
-                Point3D p1 = new Point3D(triangle[i].point1.X, 0, triangle[i].point1.Y);
-                Point3D p2 = new Point3D(triangle[i].point2.X, 0, triangle[i].point2.Y);
-                Point3D p3 = new Point3D(triangle[i].point3.X, 0, triangle[i].point3.Y);
-
-
+                Point3D p1 = new Point3D(triangle.Vertices[0].X, 0, triangle.Vertices[0].Y);
+                Point3D p2 = new Point3D(triangle.Vertices[1].X, 0, triangle.Vertices[1].Y);
+                Point3D p3 = new Point3D(triangle.Vertices[2].X, 0, triangle.Vertices[2].Y);
                 // Add the triangles.
                 AddTriangle(mesh, p1, p2, p3);
             }
@@ -148,10 +132,6 @@ namespace TriangulationAndMore
             model_group.Children.Add(VertexNormalsModel);
         }
 
-        void Init()// Функция инцилизации компонентов
-        {
-
-        }
 
         private void TriangulationButtonClick(object sender, RoutedEventArgs e)
         {
@@ -164,8 +144,6 @@ namespace TriangulationAndMore
             // Define lights.
             DefineLights();
             PointsProcessing pp = new PointsProcessing();
-            triangle = pp.GenerateTriangles(xmin, xmax, zmin, zmax, _pointsCount);
-            points = pp.points;
             // Create the model.
             DefineModel(MainModel3Dgroup);
 
@@ -230,6 +208,18 @@ namespace TriangulationAndMore
         }
 
 
+
+        private void AddLine(MeshGeometry3D mesh, Point3D point1, Point3D point2)
+        {
+
+            // Get the points' indices.
+            int index1 = AddPoint(mesh.Positions, point1);
+            int index2 = AddPoint(mesh.Positions, point2);
+
+            // Create the triangle.
+            mesh.TriangleIndices.Add(index1);
+            mesh.TriangleIndices.Add(index2);
+        }
         private void AddTriangle(MeshGeometry3D mesh, Point3D point1, Point3D point2, Point3D point3)
         {
 

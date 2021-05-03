@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Repository\\TriangulationAndMore\\TriangulationAndMore\\TriangulationAndMore.csproj": {}
+    "C:\\Repository\\DelaunayTriangulationGalerkinMethod\\TriangulationAndMore\\TriangulationAndMore.csproj": {}
   },
   "projects": {
-    "C:\\Repository\\TriangulationAndMore\\TriangulationAndMore\\TriangulationAndMore.csproj": {
+    "C:\\Repository\\DelaunayTriangulationGalerkinMethod\\TriangulationAndMore\\TriangulationAndMore.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Repository\\TriangulationAndMore\\TriangulationAndMore\\TriangulationAndMore.csproj",
+        "projectUniqueName": "C:\\Repository\\DelaunayTriangulationGalerkinMethod\\TriangulationAndMore\\TriangulationAndMore.csproj",
         "projectName": "TriangulationAndMore",
-        "projectPath": "C:\\Repository\\TriangulationAndMore\\TriangulationAndMore\\TriangulationAndMore.csproj",
+        "projectPath": "C:\\Repository\\DelaunayTriangulationGalerkinMethod\\TriangulationAndMore\\TriangulationAndMore.csproj",
         "packagesPath": "C:\\Users\\pravm\\.nuget\\packages\\",
-        "outputPath": "C:\\Repository\\TriangulationAndMore\\TriangulationAndMore\\obj\\",
+        "outputPath": "C:\\Repository\\DelaunayTriangulationGalerkinMethod\\TriangulationAndMore\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\pravm\\AppData\\Roaming\\NuGet\\NuGet.Config",

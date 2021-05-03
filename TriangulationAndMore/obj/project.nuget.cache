@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "PkZkYLF7YBj/BqKfV0ALl+dppr7KRtkXG2QSQodel426lJWF2bVHvdoYuY0tCywbhWJINqWXoxlnh3jtPy6x0g==",
+  "dgSpecHash": "HGD95Ks3H24lxZAbPL8XrNdClurhuTa3t6MgMj0hUfaC/3Jduegd/hPptiz6EDjKRozIVLfMF42/hEAct0Cvrw==",
   "success": true,
-  "projectFilePath": "C:\\Repository\\TriangulationAndMore\\TriangulationAndMore\\TriangulationAndMore.csproj",
+  "projectFilePath": "C:\\Repository\\DelaunayTriangulationGalerkinMethod\\TriangulationAndMore\\TriangulationAndMore.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }
