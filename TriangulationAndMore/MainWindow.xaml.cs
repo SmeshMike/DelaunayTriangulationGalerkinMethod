@@ -34,25 +34,20 @@ namespace TriangulationAndMore
         // The wireframe's model.
         private GeometryModel3D VertexNormalsModel;
         private GeometryModel3D WireframeModel;
-        private List<Triangle> triangle;
-        private List<PointF> points;
-        private int _pointsCount;
 
         private PerspectiveCamera TheCamera;// The change in CameraPhi when you press the up and down arrows.
         private const double CameraDPhi = 0.1;
 
         // The change in CameraTheta when you press the left and right arrows.
-        private const double CameraDTheta = 0.1;
+        private const double CameraDTheta = 0.05;
 
         // The change in CameraR when you press + or -.
-        private const double CameraDR = 0.1;
+        private const double CameraDR = 10;
 
         private double CameraPhi = Math.PI / 6.0;  // 30 degrees
         private double CameraTheta = Math.PI / 6.0;// 30 degrees
-        private double CameraR = 190.0;
+        private double CameraR = 550.0;
 
-        const double xmax = 2;
-        const double zmax = 2;
  
         public MainWindow()
         {
@@ -65,7 +60,6 @@ namespace TriangulationAndMore
         // in the XAML code that displays everything.
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            _pointsCount = Convert.ToInt32(pointsCount.Text);
             TheCamera = new PerspectiveCamera();
             TheCamera.FieldOfView = 60;
             MainViewport.Camera = TheCamera;
@@ -90,7 +84,7 @@ namespace TriangulationAndMore
             MeshGeometry3D mesh = new MeshGeometry3D();
 
 
-            var points = delaunay.GeneratePoints(xmax, zmax,10);
+            var points = delaunay.GenerateGrid(80, 160,10, 30);
 
             var triangulation = delaunay.BowyerWatson(points);
             var edges = new List<Edge>();
@@ -133,27 +127,7 @@ namespace TriangulationAndMore
         }
 
 
-        private void TriangulationButtonClick(object sender, RoutedEventArgs e)
-        {
-            MainModel3Dgroup.Children.Clear();
-            MainViewport.Children.Clear();
-            _pointsCount = Convert.ToInt32(pointsCount.Text);
-            MainViewport.Camera = TheCamera;
-            PositionCamera();
-
-            // Define lights.
-            DefineLights();
-            PointsProcessing pp = new PointsProcessing();
-            // Create the model.
-            DefineModel(MainModel3Dgroup);
-
-            // Add the group of models to a ModelVisual3D.
-            ModelVisual3D model_visual = new ModelVisual3D();
-            model_visual.Content = MainModel3Dgroup;
-
-            // Display the main visual in the viewportt.
-            MainViewport.Children.Add(model_visual);
-        }
+        
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {

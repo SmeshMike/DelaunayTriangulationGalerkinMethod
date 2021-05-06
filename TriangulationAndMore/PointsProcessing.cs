@@ -42,6 +42,36 @@ namespace TriangulationAndMore
             return points;
         }
 
+        public IEnumerable<Point> GenerateGrid(double maxX, double maxY, int zoom, int r)
+        {
+            MaxX = maxX;
+            MaxY = maxY;
+
+            var point0 = new Point(-MaxX * zoom / 2, -MaxY * zoom / 2);
+            var point1 = new Point(-MaxX * zoom / 2, MaxY * zoom / 2);
+            var point2 = new Point(MaxX * zoom / 2, MaxY * zoom / 2);
+            var point3 = new Point(MaxX * zoom / 2, -MaxY * zoom / 2);
+            var points = new List<Point>();
+            var tri1 = new Triangle(point0, point1, point3);
+            var tri2 = new Triangle(point1, point2, point3);
+            border = new List<Triangle>() { tri1, tri2 };
+            for (var i = -(maxX / 2); i <= maxX / 2; i++)
+            {
+                for (var j = -(maxY / 2); j <= maxY / 2; j++)
+                {
+                    if (!(((i) * (i) + (j+ maxY / 4) * (j + maxY / 4) < r * r)|| ((i) * (i) + (j - maxY / 4) * (j - maxY / 4) < r * r)))
+                    {
+                        var pointX = i * zoom;
+                        var pointY = j * zoom;
+                        points.Add(new Point(pointX, pointY));
+                    }
+                }
+            }
+
+
+            return points;
+        }
+
 
         public List<Triangle> triangles;
         public List<PointF> points;

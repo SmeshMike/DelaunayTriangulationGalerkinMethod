@@ -5,20 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TriangulationAndMore"
         mc:Ignorable="d"
-        Title="MainWindow" Height="720" Width="1400"
+        Title="MainWindow" Height="720" Width="1286"
         Loaded="WindowLoaded"
         KeyDown="Window_KeyDown"
         >
     <Grid>
-        <Button Content="Triangulation"
-                HorizontalAlignment="Right"
-                Margin="0,648,14,0"
-                VerticalAlignment="Top"
-                Width="75"
-                Click="TriangulationButtonClick"/>
 
         <Viewport3D Grid.Row="0" Grid.Column="0"
-                    Name="MainViewport" Margin="10,10,130,10" />
-        <TextBox x:Name="pointsCount" HorizontalAlignment="Right" Margin="0,607,14,0" Text="4" TextWrapping="Wrap" VerticalAlignment="Top" Width="75" Height="20"/>
+                    Name="MainViewport" Margin="10,10,10,10" />
     </Grid>
 </Window>
