@@ -8,6 +8,7 @@ namespace TriangulationAndMore
     {
         public Point Point1 { get; }
         public Point Point2 { get; }
+        public int UsersCount { get; }
 
         public Edge(Point point1, Point point2)
         {

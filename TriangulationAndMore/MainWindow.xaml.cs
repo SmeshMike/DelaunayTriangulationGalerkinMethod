@@ -82,15 +82,36 @@ namespace TriangulationAndMore
         {
             // Make a mesh to hold the surface.
             MeshGeometry3D mesh = new MeshGeometry3D();
+            MeshGeometry3D borderMesh = new MeshGeometry3D();
 
-
-            var points = delaunay.GenerateGrid(80, 160,10, 30);
+            var maxX = 30;
+            var maxY = 30;
+            var zoom = 10;
+            var r =12;
+            var points = delaunay.TestGenerateGrid(maxX, maxY, zoom, r);
 
             var triangulation = delaunay.BowyerWatson(points);
-            var edges = new List<Edge>();
+
+
+            //triangulation = triangulation.Where(triangle=> !((triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y == -maxY / 4 * zoom) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == -maxY / 4 * zoom) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == -maxY / 4 * zoom) ||
+            //                                     (triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y == maxY / 4 * zoom) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == maxY / 4 * zoom) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == maxY / 4 * zoom)));
+            
+            triangulation = triangulation.Where(triangle => !((triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y == 0) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == 0) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == 0)));
+
+            var borderPoints = points.Where(point=> point.IsBoundary);
+            foreach (var point in borderPoints)
+            {
+                Point3D p1 = new Point3D(point.X, 1, point.Y);
+                int index1 = AddPoint(borderMesh.Positions, p1);
+
+                borderMesh.TriangleIndices.Add(index1);
+            }
 
             foreach (var triangle in triangulation)
             {
+                //if((triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y== -maxY / 4 * zoom) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == -maxY / 4 * zoom) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == -maxY / 4 * zoom) ||
+                //   (triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y == maxY / 4 * zoom) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == maxY / 4 * zoom) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == maxY / 4 * zoom))
+                //    continue;
                 Point3D p1 = new Point3D(triangle.Vertices[0].X, 0, triangle.Vertices[0].Y);
                 Point3D p2 = new Point3D(triangle.Vertices[1].X, 0, triangle.Vertices[1].Y);
                 Point3D p3 = new Point3D(triangle.Vertices[2].X, 0, triangle.Vertices[2].Y);
@@ -98,7 +119,6 @@ namespace TriangulationAndMore
                 AddTriangle(mesh, p1, p2, p3);
             }
             
-
             // Make the surface's material using a solid green brush.
                 DiffuseMaterial surface_material = new DiffuseMaterial(Brushes.Orange);
 
@@ -115,15 +135,17 @@ namespace TriangulationAndMore
             double thickness = 0.3;
             double length = 5;
 
+            MeshGeometry3D vnormals = borderMesh.ToUpVectors(length, thickness);
+            DiffuseMaterial vnormals_material = new DiffuseMaterial(Brushes.Green);
+            VertexNormalsModel = new GeometryModel3D(vnormals, vnormals_material);
+            model_group.Children.Add(VertexNormalsModel);
+
             MeshGeometry3D wireframe = mesh.ToWireframe(thickness);
             DiffuseMaterial wireframe_material = new DiffuseMaterial(Brushes.Black);
             WireframeModel = new GeometryModel3D(wireframe, wireframe_material);
             model_group.Children.Add(WireframeModel);
 
-            MeshGeometry3D vnormals = mesh.ToVertexNormals(length, thickness);
-            DiffuseMaterial vnormals_material = new DiffuseMaterial(Brushes.Green);
-            VertexNormalsModel = new GeometryModel3D(vnormals, vnormals_material);
-            model_group.Children.Add(VertexNormalsModel);
+
         }
 
 
@@ -182,18 +204,6 @@ namespace TriangulationAndMore
         }
 
 
-
-        private void AddLine(MeshGeometry3D mesh, Point3D point1, Point3D point2)
-        {
-
-            // Get the points' indices.
-            int index1 = AddPoint(mesh.Positions, point1);
-            int index2 = AddPoint(mesh.Positions, point2);
-
-            // Create the triangle.
-            mesh.TriangleIndices.Add(index1);
-            mesh.TriangleIndices.Add(index2);
-        }
         private void AddTriangle(MeshGeometry3D mesh, Point3D point1, Point3D point2, Point3D point3)
         {
 

@@ -8,10 +8,11 @@ namespace TriangulationAndMore
     public class Triangle
     {
         public Point[] Vertices { get; } = new Point[3];
+        public Edge[] Edges { get; } = new Edge[3];
         public Point Circumcenter { get; private set; }
         public double RadiusSquared;
 
-        public IEnumerable<Triangle> TrianglesWithSharedEdge
+        public ICollection<Triangle> TrianglesWithSharedEdge
         {
             get
             {
@@ -43,17 +44,24 @@ namespace TriangulationAndMore
                 Vertices[0] = point1;
                 Vertices[1] = point3;
                 Vertices[2] = point2;
+                Edges[0] = new Edge(point1, point3);
+                Edges[1] = new Edge(point3, point2);
+                Edges[2] = new Edge(point2, point1);
             }
             else
             {
                 Vertices[0] = point1;
                 Vertices[1] = point2;
                 Vertices[2] = point3;
+                Edges[0] = new Edge(point1, point3);
+                Edges[1] = new Edge(point2, point3);
+                Edges[2] = new Edge(point3, point1);
             }
 
             Vertices[0].AdjacentTriangles.Add(this);
             Vertices[1].AdjacentTriangles.Add(this);
             Vertices[2].AdjacentTriangles.Add(this);
+
             UpdateCircumcircle();
         }
 

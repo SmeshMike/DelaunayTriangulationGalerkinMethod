@@ -80,6 +80,39 @@ namespace TriangulationAndMore
             return normals;
         }
 
+        public static MeshGeometry3D ToUpVectors(this MeshGeometry3D mesh,
+            double length, double thickness)
+        {
+            // Copy existing vertex normals.
+            Vector3D[] vertex_normals = new Vector3D[mesh.Positions.Count];
+            for (int i = 0; i < mesh.Normals.Count; i++)
+                vertex_normals[i] = mesh.Normals[i];
+
+            // Calculate missing vetex normals.
+            for (int vertex = mesh.Normals.Count; vertex < mesh.Positions.Count; vertex++)
+            {
+                vertex_normals[vertex] = new Vector3D(0, 1, 0);
+            }
+
+            // Make a mesh to hold the normals.
+            MeshGeometry3D normals = new MeshGeometry3D();
+
+            // Convert the normal vectors into segments.
+            for (int i = 0; i < mesh.Positions.Count; i++)
+            {
+                // Set the normal vector's length.
+                vertex_normals[i] = ScaleVector(vertex_normals[i], length);
+
+                // Find the other end point.
+                Point3D endpoint = mesh.Positions[i] + vertex_normals[i];
+
+                // Create the segment.
+                AddSegment(normals, mesh.Positions[i], endpoint, thickness);
+            }
+
+            return normals;
+        }
+
         public static Vector3D FindTriangleNormal(Point3D point1, Point3D point2, Point3D point3)
         {
             // Get two edge vectors.
