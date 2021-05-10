@@ -11,6 +11,7 @@ namespace TriangulationAndMore
         public Edge[] Edges { get; } = new Edge[3];
         public Point Circumcenter { get; private set; }
         public double RadiusSquared;
+        public int BoundaryPointsCount;
 
         public ICollection<Triangle> TrianglesWithSharedEdge
         {
@@ -39,6 +40,7 @@ namespace TriangulationAndMore
                 throw new ArgumentException("Must be 3 distinct points");
             }
 
+            
             if (!IsCounterClockwise(point1, point2, point3))
             {
                 Vertices[0] = point1;
@@ -57,7 +59,7 @@ namespace TriangulationAndMore
                 Edges[1] = new Edge(point2, point3);
                 Edges[2] = new Edge(point3, point1);
             }
-
+            BoundaryPointsCount = Vertices.Count(point => point.IsBoundary);
             Vertices[0].AdjacentTriangles.Add(this);
             Vertices[1].AdjacentTriangles.Add(this);
             Vertices[2].AdjacentTriangles.Add(this);
@@ -110,9 +112,6 @@ namespace TriangulationAndMore
             return d_squared < RadiusSquared;
         }
 
-        public IEnumerable<Triangle> CommonTriangles(Point point1, Point point2)
-        {
-            return point1.AdjacentTriangles.Intersect(point2.AdjacentTriangles);
-        }
+        
     }
 }

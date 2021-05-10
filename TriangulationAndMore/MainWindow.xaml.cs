@@ -97,7 +97,7 @@ namespace TriangulationAndMore
             //                                     (triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y == maxY / 4 * zoom) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == maxY / 4 * zoom) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == maxY / 4 * zoom)));
             
             triangulation = triangulation.Where(triangle => !((triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y == 0) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == 0) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == 0)));
-
+            points = points.Where(point => point.X != 0 && point.Y != 0);
             var borderPoints = points.Where(point=> point.IsBoundary);
             var innerPoints = points.Where(point => !point.IsBoundary);
             foreach (var point in borderPoints)

@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO.Enumeration;
 using System.Linq;
 using System.Text;
+using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using Color = System.Windows.Media.Color;
@@ -146,25 +147,77 @@ namespace TriangulationAndMore
             return triangulation;
         }
 
-        public void GetB(List<Triangle> triangles)
+        public void GetB(List<Point> bounderyPoints, List<Point> innerPoints)
         {
-            List<Point> usedPoints = new List<Point>();
-            foreach (var triangle in triangles)
+            List<KeyValuePair<double,Point>> bkp = new List<KeyValuePair<double, Point>>();
+            foreach (var bounderyPoint in bounderyPoints)
             {
-                if(triangle.Vertices.Any(point => point.IsBoundary))
-                    foreach (var point in triangle.Vertices)
+                foreach (var innerPoint in innerPoints)
+                {
+                    var commonTriangles = GetCommonTriangles(bounderyPoint, innerPoint).ToList();
+                    var borderTriangle = commonTriangles.Aggregate((i1, i2) => i1.BoundaryPointsCount > i2.BoundaryPointsCount ? i1 : i2);
+                    var innerTriangle = commonTriangles.Aggregate((i1, i2) => i1.BoundaryPointsCount < i2.BoundaryPointsCount ? i1 : i2);
+                    if (commonTriangles.Count > 0)
                     {
-                        if (point.IsBoundary && )
+                        var lowerVertex1 = commonTriangles[0].Vertices.Where(coord => coord.X != bounderyPoint.X && coord.X != bounderyPoint.Y && coord.Y != innerPoint.X && coord.Y != innerPoint.Y).ToList().LastOrDefault();
+                        var lowerVertex2 = commonTriangles[1].Vertices.Where(coord => coord.X != bounderyPoint.X && coord.X != bounderyPoint.Y && coord.Y != innerPoint.X && coord.Y != innerPoint.Y).ToList().LastOrDefault();
+                        var m11 = new Point3D(lowerVertex1.X, lowerVertex1.Y, 0);
+                        var m12 = new Point3D(lowerVertex2.X, lowerVertex2.Y, 0);
+                        var m2 = new Point3D(innerPoint.X, innerPoint.Y, 1);
+                        var m3 = new Point3D(bounderyPoint.X, bounderyPoint.Y, 1);
+                        Triangle3D t1 = new Triangle3D(m11, m2, m3);
+                        Triangle3D t2 = new Triangle3D(m12, m2, m3);
+                        var b = (t1.A * t2.A + t1.B * t2.B) * (t1.S + t2.S);
+                        bkp.Add(new KeyValuePair<double, Point>(b, innerPoint));
+                    }
+                }
+            }
+        }
+
+        public void GetA(List<Point> innerPoints)
+        {
+            List<KeyValuePair<double, Point>> akp = new List<KeyValuePair<double, Point>>();
+            foreach (var iPoint in innerPoints)
+            {
+                foreach (var jPoint in innerPoints)
+                {
+                    if (iPoint == jPoint)
+                    {
+                        double a = 0;
+                        var triangles = iPoint.AdjacentTriangles.ToList();
+                        foreach (var triangle in triangles)
                         {
-                            Point3D pi1 = new Point3D(iPoint.X, iPoint.Y, 1);
-                            Point3D pi1 = new Point3D(iPoint.X, iPoint.Y, 1);
-                            Point3D pi1 = new Point3D(iPoint.X, iPoint.Y, 1);
-                            var a
+                            var lowerVertex = triangle.Vertices.Where(coord => coord != iPoint).ToArray();
+                            var m1 = new Point3D(lowerVertex[0].X, lowerVertex[0].Y, 0);
+                            var m2 = new Point3D(lowerVertex[1].X, lowerVertex[1].Y, 0);
+                            var m3 = new Point3D(iPoint.X, iPoint.Y, 1);
+                            Triangle3D t3D = new Triangle3D(m1, m2, m3);
+                            a += (t3D.A * t3D.A + t3D.B * t3D.B) * t3D.S;
+                        }
+                        akp.Add(new KeyValuePair<double, Point>(a, iPoint));
+                    }
+                    else if (GetCommonTriangles(iPoint, jPoint).ToList().Count > 0)
+                    {
+                        double a = 0;
+                        var commonTriangles = GetCommonTriangles(iPoint, jPoint).ToList();
+                        if (commonTriangles.Count > 0)
+                        {
+                            var lowerVertex1 = commonTriangles[0].Vertices.Where(coord => coord != iPoint && coord != jPoint).ToList().LastOrDefault();
+                            var lowerVertex2 = commonTriangles[1].Vertices.Where(coord => coord != iPoint && coord != jPoint).ToList().LastOrDefault();
+                            var m11 = new Point3D(lowerVertex1.X, lowerVertex1.Y, 0);
+                            var m12 = new Point3D(lowerVertex2.X, lowerVertex2.Y, 0);
+                            var m2 = new Point3D(iPoint.X, iPoint.Y, 1);
+                            var m3 = new Point3D(jPoint.X, jPoint.Y, 1);
+                            Triangle3D t1 = new Triangle3D(m11, m2, m3);
+                            Triangle3D t2 = new Triangle3D(m12, m2, m3);
+                            a += (t1.A * t2.A + t1.B * t2.B) * (t1.S + t2.S);
 
                         }
                     }
+                }
             }
         }
+
         private List<Edge> FindHoleBoundaries(ISet<Triangle> badTriangles)
         {
             var edges = new List<Edge>();
@@ -185,6 +238,10 @@ namespace TriangulationAndMore
             return new HashSet<Triangle>(badTriangles);
         }
 
+        public IEnumerable<Triangle> GetCommonTriangles(Point point1, Point point2)
+        {
+            return point1.AdjacentTriangles.Intersect(point2.AdjacentTriangles);
+        }
 
     }
 }
