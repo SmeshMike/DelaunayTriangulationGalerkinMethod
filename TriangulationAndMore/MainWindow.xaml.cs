@@ -99,6 +99,7 @@ namespace TriangulationAndMore
             triangulation = triangulation.Where(triangle => !((triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y == 0) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == 0) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == 0)));
 
             var borderPoints = points.Where(point=> point.IsBoundary);
+            var innerPoints = points.Where(point => !point.IsBoundary);
             foreach (var point in borderPoints)
             {
                 Point3D p1 = new Point3D(point.X, 1, point.Y);

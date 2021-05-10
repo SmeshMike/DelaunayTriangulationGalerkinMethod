@@ -148,6 +148,7 @@ namespace TriangulationAndMore
 
         public void GetB(List<Triangle> triangles)
         {
+            List<Point> usedPoints = new List<Point>();
             foreach (var triangle in triangles)
             {
                 if(triangle.Vertices.Any(point => point.IsBoundary))

@@ -109,5 +109,10 @@ namespace TriangulationAndMore
                 (point.Y - Circumcenter.Y) * (point.Y - Circumcenter.Y);
             return d_squared < RadiusSquared;
         }
+
+        public IEnumerable<Triangle> CommonTriangles(Point point1, Point point2)
+        {
+            return point1.AdjacentTriangles.Intersect(point2.AdjacentTriangles);
+        }
     }
 }
