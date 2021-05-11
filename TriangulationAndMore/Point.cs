@@ -20,7 +20,7 @@ namespace TriangulationAndMore
         public double X { get; }
         public double Y { get; }
         public bool IsBoundary { get; set; }
-        public HashSet<Triangle> AdjacentTriangles { get; } = new HashSet<Triangle>();
+        public HashSet<Triangle> AdjacentTriangles { get; set; } = new HashSet<Triangle>();
 
         public Point(double x, double y)
         {
@@ -32,6 +32,8 @@ namespace TriangulationAndMore
         public override string ToString()
         {
             // Simple way of seeing what's going on in the debugger when investigating weirdness
+
+            
             return $"{nameof(Point)} {_instanceId} {X:0.##}@{Y:0.##}";
         }
     }
