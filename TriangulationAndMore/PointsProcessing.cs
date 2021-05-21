@@ -81,7 +81,7 @@ namespace TriangulationAndMore
             return points;
         }
 
-        public IEnumerable<Point> GenerateGrid(double maxX, double maxY, int zoom, int r)
+        public IEnumerable<Point> GenerateGrid(double maxX, double maxY, double zoom, int r)
         {
             MaxX = maxX;
             MaxY = maxY;
@@ -104,8 +104,10 @@ namespace TriangulationAndMore
 
                         if (i == (maxX / 2) || i == -(maxX / 2) || j == -(maxY / 2) || j == (maxY / 2))
                             point.IsBoundary = true;
-                        else if ((((i) * (i) + (j + maxY / 4) * (j + maxY / 4) <= (r +0.25) * (r + 0.25)) || ((i) * (i) + (j - maxY / 4) * (j - maxY / 4) <= (r + 0.25) * (r + 0.25))))
-                            point.IsBoundary = true;
+                        else if ((((i) * (i) + (j + maxY / 4) * (j + maxY / 4) <= (r +0.25) * (r + 0.25))))
+                            point.IsInnerBoundaryPlus = true;
+                        else if (((i) * (i) + (j - maxY / 4) * (j - maxY / 4) <= (r + 0.25) * (r + 0.25)))
+                            point.IsInnerBoundaryMinus = true;
                         points.Add(point);
                     }
                 }
@@ -162,25 +164,25 @@ namespace TriangulationAndMore
             double a;
             foreach (var iPoint in points)
             {
-                b = 0;
+                b = -0.03;
                 aList.Add(new List<double>());
                 foreach (var jPoint in points)
                 {
                     a = 0;
-                    if (iPoint.IsBoundary && !jPoint.IsBoundary)
+                    if (!iPoint.IsBoundary && jPoint.IsBoundary)
                     {
                         var commonTriangles = GetCommonTriangles(iPoint, jPoint).ToList();
                         //var borderTriangle = commonTriangles.Aggregate((i1, i2) => i1.BoundaryPointsCount > i2.BoundaryPointsCount ? i1 : i2);
                         //var innerTriangle = commonTriangles.Aggregate((i1, i2) => i1.BoundaryPointsCount < i2.BoundaryPointsCount ? i1 : i2);
-                        if (commonTriangles.Count > 0)
+                        if (commonTriangles.Count > 1)
                         {
                             var lowerVertex1 = commonTriangles[0].Vertices.Where(coord => coord != iPoint && coord != jPoint).ToList().LastOrDefault();
                             var lowerVertex2 = commonTriangles[1].Vertices.Where(coord => coord != iPoint && coord != jPoint).ToList().LastOrDefault();
                             var lowV1 = new Point3D(lowerVertex1.X, lowerVertex1.Y, 0);
                             var lowV2 = new Point3D(lowerVertex2.X, lowerVertex2.Y, 0);
                             var in0 = new Point3D(jPoint.X, jPoint.Y, 0);
-                            var in1 = new Point3D(jPoint.X, jPoint.Y, 1);
-                            var bor1 = new Point3D(iPoint.X, iPoint.Y, 1);
+                            var in1 = new Point3D(jPoint.X, jPoint.Y, 10);
+                            var bor1 = new Point3D(iPoint.X, iPoint.Y, 10);
                             var bor0 = new Point3D(iPoint.X, iPoint.Y, 0);
                             Triangle3D t11 = new Triangle3D(bor1, lowV1, in0);
                             Triangle3D t12 = new Triangle3D(bor0, lowV1, in1);
@@ -188,6 +190,14 @@ namespace TriangulationAndMore
                             Triangle3D t22 = new Triangle3D(bor0, lowV2, in1);
                             b += (t11.A * t12.A + t11.B * t12.B) * t11.S0 + (t21.A * t22.A + t21.B * t22.B) * t21.S0;
                         }
+                    }
+                    else if (iPoint.IsInnerBoundaryPlus )
+                    {
+                        b = 5;
+                    }
+                    else if (iPoint.IsInnerBoundaryMinus)
+                    {
+                        b = -100000000000;
                     }
                     else if (!iPoint.IsBoundary && iPoint == jPoint)
                     {
@@ -197,9 +207,9 @@ namespace TriangulationAndMore
                             var lowerVertex = triangle.Vertices.Where(coord => coord != iPoint).ToArray();
                             var m1 = new Point3D(lowerVertex[0].X, lowerVertex[0].Y, 0);
                             var m2 = new Point3D(lowerVertex[1].X, lowerVertex[1].Y, 0);
-                            var m3 = new Point3D(iPoint.X, iPoint.Y, 1);
+                            var m3 = new Point3D(iPoint.X, iPoint.Y, 10);
                             Triangle3D t3D = new Triangle3D(m1, m2, m3);
-                            a += (t3D.A * t3D.A + t3D.B * t3D.B) * t3D.S;
+                            a += (t3D.A * t3D.A + t3D.B * t3D.B) * t3D.S0;
                         }
                     }
                     else if (GetCommonTriangles(iPoint, jPoint).ToList().Count > 0 && !iPoint.IsBoundary && !jPoint.IsBoundary)
@@ -212,8 +222,8 @@ namespace TriangulationAndMore
                             var lowV1 = new Point3D(lowerVertex1.X, lowerVertex1.Y, 0);
                             var lowV2 = new Point3D(lowerVertex2.X, lowerVertex2.Y, 0);
                             var in0 = new Point3D(jPoint.X, jPoint.Y, 0);
-                            var in1 = new Point3D(jPoint.X, jPoint.Y, 1);
-                            var bor1 = new Point3D(iPoint.X, iPoint.Y, 1);
+                            var in1 = new Point3D(jPoint.X, jPoint.Y, 10);
+                            var bor1 = new Point3D(iPoint.X, iPoint.Y, 10);
                             var bor0 = new Point3D(iPoint.X, iPoint.Y, 0);
                             Triangle3D t11 = new Triangle3D(bor1, lowV1, in0);
                             Triangle3D t12 = new Triangle3D(bor0, lowV1, in1);
@@ -242,7 +252,7 @@ namespace TriangulationAndMore
             double s1, s2, fa1, t;
             double[] x1 = new double[b.Count];
             List<double> x = new List<double>();
-            x.Add(0.5f);
+            x.Add(0.0);
             for (i = 1; i < b.Count; i++) x.Add(0);
 
             s1 = s2 = 1;

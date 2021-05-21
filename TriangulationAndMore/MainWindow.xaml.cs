@@ -42,11 +42,11 @@ namespace TriangulationAndMore
         private const double CameraDTheta = 0.05;
 
         // The change in CameraR when you press + or -.
-        private const double CameraDR = 10;
+        private const double CameraDR = 0.1;
 
         private double CameraPhi = Math.PI / 6.0;  // 30 degrees
         private double CameraTheta = Math.PI / 6.0;// 30 degrees
-        private double CameraR = 550.0;
+        private double CameraR = 1.0;
 
  
         public MainWindow()
@@ -84,24 +84,35 @@ namespace TriangulationAndMore
             MeshGeometry3D mesh = new MeshGeometry3D();
             MeshGeometry3D borderMesh = new MeshGeometry3D();
 
-            var maxX = 140;
-            var maxY = 100;
-            var zoom = 10;
-            var r =2;
+            var maxX = 36;
+            var maxY = 48;
+            var zoom = 1;
+            var r = 8;
             var points = delaunay.GenerateGrid(maxX, maxY, zoom, r);
 
-            var triangulation = delaunay.BowyerWatson(points);
-            triangulation = triangulation.Where(triangle => !((triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y == -maxY / 4 * zoom) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == -maxY / 4 * zoom) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == -maxY / 4 * zoom) ||
-                                                              (triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y == maxY / 4 * zoom) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == maxY / 4 * zoom) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == maxY / 4 * zoom)));
+            
 
-            points = points.Where(point => !((point.X == 0 && point.Y == maxY / 4 * zoom) || (point.X == 0 && point.Y == -maxY / 4 * zoom)));
+            var triangulation = delaunay.BowyerWatson(points);
+            triangulation = triangulation.Where(triangle => !((triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y == -(double)maxY / 4 * zoom / 10) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == -(double)maxY / 4 * zoom / 10) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == -(double)maxY / 4 * zoom / 10) ||
+                                                              (triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y == (double)maxY / 4 * zoom / 10) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == (double)maxY / 4 * zoom / 10) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == (double)maxY / 4 * zoom / 10)));
+
             foreach (var point in points)
             {
+                point.X = (double)point.X/ 10;
+                point.Y = (double)point.Y/10;
                 point.AdjacentTriangles = new HashSet<Triangle>();
             }
+            points = points.Where(point => !((point.X == 0 && point.Y == (double)maxY / 4 * zoom/10) || (point.X == 0 && point.Y == -(double)maxY / 4 * zoom/10)));
+            
             foreach (var triangle in triangulation)
             {
                 var tmp = points.ToList();
+                triangle.Vertices[0].X = Math.Abs(triangle.Vertices[0].X) > maxX/2-1 ? triangle.Vertices[0].X/10: triangle.Vertices[0].X;
+                triangle.Vertices[1].X = Math.Abs(triangle.Vertices[1].X) > maxX / 2 - 1 ? triangle.Vertices[1].X / 10 : triangle.Vertices[1].X;
+                triangle.Vertices[2].X = Math.Abs(triangle.Vertices[2].X) > maxX / 2 - 1 ? triangle.Vertices[2].X / 10 : triangle.Vertices[2].X;
+                triangle.Vertices[0].Y = Math.Abs(triangle.Vertices[0].Y) > maxY / 2 - 1 ? triangle.Vertices[0].Y / 10 : triangle.Vertices[0].Y;
+                triangle.Vertices[1].Y = Math.Abs(triangle.Vertices[1].Y) > maxY / 2 - 1 ? triangle.Vertices[1].Y / 10 : triangle.Vertices[1].Y;
+                triangle.Vertices[2].Y = Math.Abs(triangle.Vertices[2].Y) > maxY / 2 - 1 ? triangle.Vertices[2].Y / 10 : triangle.Vertices[2].Y;
                 tmp.FirstOrDefault(point => point.X == triangle.Vertices[0].X && point.Y == triangle.Vertices[0].Y).AdjacentTriangles.Add(triangle);
                 tmp.FirstOrDefault(point => point.X == triangle.Vertices[1].X && point.Y == triangle.Vertices[1].Y).AdjacentTriangles.Add(triangle);
                 tmp.FirstOrDefault(point => point.X == triangle.Vertices[2].X && point.Y == triangle.Vertices[2].Y).AdjacentTriangles.Add(triangle);
@@ -109,6 +120,7 @@ namespace TriangulationAndMore
                 triangle.Vertices[1].AdjacentTriangles.Add(triangle);
                 triangle.Vertices[2].AdjacentTriangles.Add(triangle);
             }
+
             List<List<double>> aList = new List<List<double>>();
             List<double> bList = new List<double>();
             delaunay.GetAB(points.ToList(), out aList, out bList);
@@ -119,14 +131,22 @@ namespace TriangulationAndMore
             
             var borderPoints = points.Where(point => point.IsBoundary);
             //var innerPoints = points.Where(point => !point.IsBoundary);
-            foreach (var point in borderPoints)
-            {
-                Point3D p1 = new Point3D(point.X, 1, point.Y);
-                int index1 = AddPoint(borderMesh.Positions, p1);
+            //foreach (var point in borderPoints)
+            //{
+            //    Point3D p1 = new Point3D(point.X, 1, point.Y);
+            //    int index1 = AddPoint(borderMesh.Positions, p1);
 
-                borderMesh.TriangleIndices.Add(index1);
-            }
+            //    borderMesh.TriangleIndices.Add(index1);
+            //}
 
+            
+            //foreach (var point in borderPoints)
+            //{
+            //    Point3D p1 = new Point3D(-30, 1, -40);
+            //    int index1 = AddPoint(borderMesh.Positions, p1);
+
+            //    borderMesh.TriangleIndices.Add(index1);
+            //}
 
             foreach (var triangle in triangulation)
             {
@@ -161,7 +181,7 @@ namespace TriangulationAndMore
             model_group.Children.Add(SurfaceModel);
 
             // Make a wireframe.
-            double thickness = 0.3;
+            double thickness = 0.005;
             double length = 5;
 
             MeshGeometry3D vnormals = borderMesh.ToUpVectors(length, thickness);

@@ -17,9 +17,12 @@ namespace TriangulationAndMore
         /// </summary>
         private readonly int _instanceId = _counter++;
 
-        public double X { get; }
-        public double Y { get; }
+        public double X { get; set; }
+        public double Y { get; set; }
         public bool IsBoundary { get; set; }
+
+        public bool IsInnerBoundaryMinus { get; set; }
+        public bool IsInnerBoundaryPlus { get; set; }
         public HashSet<Triangle> AdjacentTriangles { get; set; } = new HashSet<Triangle>();
 
         public Point(double x, double y)
