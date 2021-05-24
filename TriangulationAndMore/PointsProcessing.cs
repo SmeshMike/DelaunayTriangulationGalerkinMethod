@@ -104,10 +104,17 @@ namespace TriangulationAndMore
 
                         if (i == (maxX / 2) || i == -(maxX / 2) || j == -(maxY / 2) || j == (maxY / 2))
                             point.IsBoundary = true;
-                        else if ((((i) * (i) + (j + maxY / 4) * (j + maxY / 4) <= (r +0.25) * (r + 0.25))))
+                        else if ((((i) * (i) + (j + maxY / 4) * (j + maxY / 4) <= (r + 0.25) * (r + 0.25))))
+                        {
                             point.IsInnerBoundaryPlus = true;
+                            point.IsBoundary = true;
+                        }
                         else if (((i) * (i) + (j - maxY / 4) * (j - maxY / 4) <= (r + 0.25) * (r + 0.25)))
+                        {
                             point.IsInnerBoundaryMinus = true;
+                            point.IsBoundary = true;
+
+                        }
                         points.Add(point);
                     }
                 }
@@ -154,7 +161,7 @@ namespace TriangulationAndMore
         }
 
 
-        public void GetAB(List<Point> points, out List<List<double>> aList, out List<double> bList)
+        public void GetAB(List<Point> points, out List<List<double>> aList, out List<double> bList, double plus, double minus)
         {
             aList = new List<List<double>>();
             bList = new List<double>();
@@ -162,12 +169,12 @@ namespace TriangulationAndMore
             foreach (var iPoint in points)
             {
                 var b = double.Epsilon;
-                //var b =0.000000000000001d;
+                //var b =0.1d;
                 aList.Add(new List<double>());
                 foreach (var jPoint in points)
                 {
-                    //var a = double.Epsilon;
-                    var a = -0.1d;
+                    var a = double.Epsilon;
+                    //var a = 0.1d;
                     if (!iPoint.IsBoundary && jPoint.IsBoundary)
                     {
                         var commonTriangles = GetCommonTriangles(iPoint, jPoint).ToList();
@@ -187,16 +194,23 @@ namespace TriangulationAndMore
                             Triangle3D t12 = new Triangle3D(bor0, lowV1, in1);
                             Triangle3D t21 = new Triangle3D(bor1, lowV2, in0);
                             Triangle3D t22 = new Triangle3D(bor0, lowV2, in1);
-                            b += (t11.A * t12.A + t11.B * t12.B) * t11.S0 + (t21.A * t22.A + t21.B * t22.B) * t21.S0;
+                            double c;
+                            if (jPoint.IsInnerBoundaryPlus)
+                            {
+                                c = plus;
+                            }
+                            else if (jPoint.IsInnerBoundaryMinus)
+                            {
+                                c = minus;
+                            }
+                            else
+                            {
+                                c = double.Epsilon;
+                            }
+                            
+                            
+                            b += c*((t11.A * t12.A + t11.B * t12.B) * t11.S0 + (t21.A * t22.A + t21.B * t22.B) * t21.S0);
                         }
-                    }
-                    else if (iPoint.IsInnerBoundaryPlus )
-                    {
-                        b =Convert.ToDouble(15d);
-                    }
-                    else if (iPoint.IsInnerBoundaryMinus)
-                    {
-                        b = Convert.ToDouble(15d);
                     }
                     else if (!iPoint.IsBoundary && iPoint == jPoint)
                     {
