@@ -42,11 +42,11 @@ namespace TriangulationAndMore
         private const double CameraDTheta = 0.05;
 
         // The change in CameraR when you press + or -.
-        private const double CameraDR = 0.1;
+        private const double CameraDR = 1;
 
         private double CameraPhi = Math.PI / 6.0;  // 30 degrees
         private double CameraTheta = Math.PI / 6.0;// 30 degrees
-        private double CameraR = 1.0;
+        private double CameraR = 30.0;
 
  
         public MainWindow()
@@ -82,77 +82,58 @@ namespace TriangulationAndMore
         {
             // Make a mesh to hold the surface.
             MeshGeometry3D mesh = new MeshGeometry3D();
-            MeshGeometry3D borderMesh = new MeshGeometry3D();
+            MeshGeometry3D borderMeshPlus = new MeshGeometry3D();
+            MeshGeometry3D borderMeshMinus = new MeshGeometry3D();
 
-            var maxX = 36;
-            var maxY = 48;
-            var zoom = 1;
-            var r = 8;
+            var maxX = 20d;
+            var maxY = 62d;
+            var zoom = 1d;
+            var r = 7;
             var points = delaunay.GenerateGrid(maxX, maxY, zoom, r);
 
             
 
             var triangulation = delaunay.BowyerWatson(points);
-            triangulation = triangulation.Where(triangle => !((triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y == -(double)maxY / 4 * zoom / 10) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == -(double)maxY / 4 * zoom / 10) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == -(double)maxY / 4 * zoom / 10) ||
-                                                              (triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y == (double)maxY / 4 * zoom / 10) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == (double)maxY / 4 * zoom / 10) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == (double)maxY / 4 * zoom / 10)));
+            triangulation = triangulation.Where(triangle => !((triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y == -(double)maxY / 4 * zoom ) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == -(double)maxY / 4 * zoom ) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == -(double)maxY / 4 * zoom ) ||
+                                                              (triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y == (double)maxY / 4 * zoom) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == (double)maxY / 4 * zoom ) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == (double)maxY / 4 * zoom)));
 
-            foreach (var point in points)
-            {
-                point.X = (double)point.X/ 10;
-                point.Y = (double)point.Y/10;
-                point.AdjacentTriangles = new HashSet<Triangle>();
-            }
-            points = points.Where(point => !((point.X == 0 && point.Y == (double)maxY / 4 * zoom/10) || (point.X == 0 && point.Y == -(double)maxY / 4 * zoom/10)));
-            
-            foreach (var triangle in triangulation)
-            {
-                var tmp = points.ToList();
-                triangle.Vertices[0].X = Math.Abs(triangle.Vertices[0].X) > maxX/2-1 ? triangle.Vertices[0].X/10: triangle.Vertices[0].X;
-                triangle.Vertices[1].X = Math.Abs(triangle.Vertices[1].X) > maxX / 2 - 1 ? triangle.Vertices[1].X / 10 : triangle.Vertices[1].X;
-                triangle.Vertices[2].X = Math.Abs(triangle.Vertices[2].X) > maxX / 2 - 1 ? triangle.Vertices[2].X / 10 : triangle.Vertices[2].X;
-                triangle.Vertices[0].Y = Math.Abs(triangle.Vertices[0].Y) > maxY / 2 - 1 ? triangle.Vertices[0].Y / 10 : triangle.Vertices[0].Y;
-                triangle.Vertices[1].Y = Math.Abs(triangle.Vertices[1].Y) > maxY / 2 - 1 ? triangle.Vertices[1].Y / 10 : triangle.Vertices[1].Y;
-                triangle.Vertices[2].Y = Math.Abs(triangle.Vertices[2].Y) > maxY / 2 - 1 ? triangle.Vertices[2].Y / 10 : triangle.Vertices[2].Y;
-                tmp.FirstOrDefault(point => point.X == triangle.Vertices[0].X && point.Y == triangle.Vertices[0].Y).AdjacentTriangles.Add(triangle);
-                tmp.FirstOrDefault(point => point.X == triangle.Vertices[1].X && point.Y == triangle.Vertices[1].Y).AdjacentTriangles.Add(triangle);
-                tmp.FirstOrDefault(point => point.X == triangle.Vertices[2].X && point.Y == triangle.Vertices[2].Y).AdjacentTriangles.Add(triangle);
-                triangle.Vertices[0].AdjacentTriangles.Add(triangle);
-                triangle.Vertices[1].AdjacentTriangles.Add(triangle);
-                triangle.Vertices[2].AdjacentTriangles.Add(triangle);
-            }
+
+            points = points.Where(point => !((point.X == 0 && point.Y == (double)maxY / 4 * zoom) || (point.X == 0 && point.Y == -(double)maxY / 4 * zoom)));
 
             List<List<double>> aList = new List<List<double>>();
             List<double> bList = new List<double>();
             delaunay.GetAB(points.ToList(), out aList, out bList);
-            var fi =delaunay.DoKachmarz(aList, bList);
+            var fi = delaunay.DoKachmarz(aList, bList);
 
-            
+
             //triangulation = triangulation.Where(triangle => !((triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y == 0) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == 0) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == 0)));
-            
-            var borderPoints = points.Where(point => point.IsBoundary);
+
+            var borderPointsMinus = points.Where(point => point.IsInnerBoundaryMinus);
+            var borderPointsPlus = points.Where(point => point.IsInnerBoundaryPlus);
+
             //var innerPoints = points.Where(point => !point.IsBoundary);
-            //foreach (var point in borderPoints)
-            //{
-            //    Point3D p1 = new Point3D(point.X, 1, point.Y);
-            //    int index1 = AddPoint(borderMesh.Positions, p1);
 
-            //    borderMesh.TriangleIndices.Add(index1);
-            //}
+            foreach (var point in borderPointsPlus)
+            {
+                Point3D p1 = new Point3D(point.X, 1, point.Y);
+                int index1 = AddPoint(borderMeshPlus.Positions, p1);
 
-            
-            //foreach (var point in borderPoints)
-            //{
-            //    Point3D p1 = new Point3D(-30, 1, -40);
-            //    int index1 = AddPoint(borderMesh.Positions, p1);
+                borderMeshPlus.TriangleIndices.Add(index1);
+            }
 
-            //    borderMesh.TriangleIndices.Add(index1);
-            //}
+            foreach (var point in borderPointsMinus)
+            {
+                Point3D p1 = new Point3D(point.X, 1, point.Y);
+                int index1 = AddPoint(borderMeshMinus.Positions, p1);
+
+                borderMeshMinus.TriangleIndices.Add(index1);
+            }
 
             foreach (var triangle in triangulation)
             {
-                //if((triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y== -maxY / 4 * zoom) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == -maxY / 4 * zoom) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == -maxY / 4 * zoom) ||
-                //   (triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y == maxY / 4 * zoom) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == maxY / 4 * zoom) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == maxY / 4 * zoom))
-                //    continue;
+                if ((triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y == -maxY / 4 * zoom) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == -maxY / 4 * zoom) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == -maxY / 4 * zoom) ||
+                   (triangle.Vertices[0].X == 0 && triangle.Vertices[0].Y == maxY / 4 * zoom) || (triangle.Vertices[1].X == 0 && triangle.Vertices[1].Y == maxY / 4 * zoom) || (triangle.Vertices[2].X == 0 && triangle.Vertices[2].Y == maxY / 4 * zoom))
+                    continue;
                 var tmp = points.ToList();
                 var index1 = tmp.IndexOf(tmp.FirstOrDefault(point => point.X == triangle.Vertices[0].X && point.Y == triangle.Vertices[0].Y));
                 var index2 = tmp.IndexOf(tmp.FirstOrDefault(point => point.X == triangle.Vertices[1].X && point.Y == triangle.Vertices[1].Y));
@@ -164,8 +145,8 @@ namespace TriangulationAndMore
                 //Point3D p1 = new Point3D(triangle.Vertices[0].X, 0, triangle.Vertices[0].Y);
                 //Point3D p2 = new Point3D(triangle.Vertices[1].X, 0, triangle.Vertices[1].Y);
                 //Point3D p3 = new Point3D(triangle.Vertices[2].X, 0, triangle.Vertices[2].Y);
-                
-               AddTriangle(mesh, p1, p2, p3);
+
+                AddTriangle(mesh, p1, p2, p3);
             }
             
             // Make the surface's material using a solid green brush.
@@ -181,13 +162,18 @@ namespace TriangulationAndMore
             model_group.Children.Add(SurfaceModel);
 
             // Make a wireframe.
-            double thickness = 0.005;
-            double length = 5;
+            double thickness = 0.01;
+            double length = 1;
 
-            MeshGeometry3D vnormals = borderMesh.ToUpVectors(length, thickness);
-            DiffuseMaterial vnormals_material = new DiffuseMaterial(Brushes.Green);
-            VertexNormalsModel = new GeometryModel3D(vnormals, vnormals_material);
-            model_group.Children.Add(VertexNormalsModel);
+            //MeshGeometry3D vPlusNormals = borderMeshPlus.ToUpVectors(length, thickness);
+            //DiffuseMaterial vnormalsPlusMaterial = new DiffuseMaterial(Brushes.Red);
+            //VertexNormalsModel = new GeometryModel3D(vPlusNormals, vnormalsPlusMaterial);
+            //model_group.Children.Add(VertexNormalsModel);
+
+            //MeshGeometry3D vMinusNormals = borderMeshMinus.ToUpVectors(length, thickness);
+            //DiffuseMaterial vnormalsMinusMaterial = new DiffuseMaterial(Brushes.Blue);
+            //VertexNormalsModel = new GeometryModel3D(vMinusNormals, vnormalsMinusMaterial);
+            //model_group.Children.Add(VertexNormalsModel);
 
             MeshGeometry3D wireframe = mesh.ToWireframe(thickness);
             DiffuseMaterial wireframe_material = new DiffuseMaterial(Brushes.Black);

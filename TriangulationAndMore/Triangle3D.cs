@@ -26,12 +26,10 @@ namespace TriangulationAndMore
             var p = side1 + side2 + side3;
             S = Math.Sqrt(p * (side1 + side2) * (side1 + side3) * (side3 + side2));
 
-            m1.Z = 0;
-            m2.Z = 0;
-            m3.Z = 0;
-            side1 = Math.Sqrt((m1.X - m2.X) * (m1.X - m2.X) + (m1.Y - m2.Y) * (m1.Y - m2.Y) + (m1.Z - m2.Z) * (m1.Z - m2.Z));
-            side2 = Math.Sqrt((m1.X - m3.X) * (m1.X - m3.X) + (m1.Y - m3.Y) * (m1.Y - m3.Y) + (m1.Z - m3.Z) * (m1.Z - m3.Z));
-            side3 = Math.Sqrt((m1.X - m3.X) * (m1.X - m3.X) + (m1.Y - m3.Y) * (m1.Y - m3.Y) + (m2.Z - m3.Z) * (m2.Z - m3.Z));
+
+            side1 = Math.Sqrt((m1.X - m2.X) * (m1.X - m2.X) + (m1.Y - m2.Y) * (m1.Y - m2.Y));
+            side2 = Math.Sqrt((m1.X - m3.X) * (m1.X - m3.X) + (m1.Y - m3.Y) * (m1.Y - m3.Y));
+            side3 = Math.Sqrt((m1.X - m3.X) * (m1.X - m3.X) + (m1.Y - m3.Y) * (m1.Y - m3.Y));
             p = side1 + side2 + side3;
             S0 = Math.Sqrt(p * (side1 + side2) * (side1 + side3) * (side3 + side2));
         }

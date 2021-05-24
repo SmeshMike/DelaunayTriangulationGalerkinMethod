@@ -158,17 +158,16 @@ namespace TriangulationAndMore
         {
             aList = new List<List<double>>();
             bList = new List<double>();
-            int i = 0;
-            int j = 0;
-            double b;
-            double a;
+            var i = 0;
             foreach (var iPoint in points)
             {
-                b = -0.03;
+                var b = double.Epsilon;
+                //var b =0.000000000000001d;
                 aList.Add(new List<double>());
                 foreach (var jPoint in points)
                 {
-                    a = 0;
+                    //var a = double.Epsilon;
+                    var a = -0.1d;
                     if (!iPoint.IsBoundary && jPoint.IsBoundary)
                     {
                         var commonTriangles = GetCommonTriangles(iPoint, jPoint).ToList();
@@ -181,8 +180,8 @@ namespace TriangulationAndMore
                             var lowV1 = new Point3D(lowerVertex1.X, lowerVertex1.Y, 0);
                             var lowV2 = new Point3D(lowerVertex2.X, lowerVertex2.Y, 0);
                             var in0 = new Point3D(jPoint.X, jPoint.Y, 0);
-                            var in1 = new Point3D(jPoint.X, jPoint.Y, 10);
-                            var bor1 = new Point3D(iPoint.X, iPoint.Y, 10);
+                            var in1 = new Point3D(jPoint.X, jPoint.Y, 1);
+                            var bor1 = new Point3D(iPoint.X, iPoint.Y, 1);
                             var bor0 = new Point3D(iPoint.X, iPoint.Y, 0);
                             Triangle3D t11 = new Triangle3D(bor1, lowV1, in0);
                             Triangle3D t12 = new Triangle3D(bor0, lowV1, in1);
@@ -193,11 +192,11 @@ namespace TriangulationAndMore
                     }
                     else if (iPoint.IsInnerBoundaryPlus )
                     {
-                        b = 5;
+                        b =Convert.ToDouble(15d);
                     }
                     else if (iPoint.IsInnerBoundaryMinus)
                     {
-                        b = -100000000000;
+                        b = Convert.ToDouble(15d);
                     }
                     else if (!iPoint.IsBoundary && iPoint == jPoint)
                     {
@@ -207,7 +206,7 @@ namespace TriangulationAndMore
                             var lowerVertex = triangle.Vertices.Where(coord => coord != iPoint).ToArray();
                             var m1 = new Point3D(lowerVertex[0].X, lowerVertex[0].Y, 0);
                             var m2 = new Point3D(lowerVertex[1].X, lowerVertex[1].Y, 0);
-                            var m3 = new Point3D(iPoint.X, iPoint.Y, 10);
+                            var m3 = new Point3D(iPoint.X, iPoint.Y, 1);
                             Triangle3D t3D = new Triangle3D(m1, m2, m3);
                             a += (t3D.A * t3D.A + t3D.B * t3D.B) * t3D.S0;
                         }
@@ -222,8 +221,8 @@ namespace TriangulationAndMore
                             var lowV1 = new Point3D(lowerVertex1.X, lowerVertex1.Y, 0);
                             var lowV2 = new Point3D(lowerVertex2.X, lowerVertex2.Y, 0);
                             var in0 = new Point3D(jPoint.X, jPoint.Y, 0);
-                            var in1 = new Point3D(jPoint.X, jPoint.Y, 10);
-                            var bor1 = new Point3D(iPoint.X, iPoint.Y, 10);
+                            var in1 = new Point3D(jPoint.X, jPoint.Y, 1);
+                            var bor1 = new Point3D(iPoint.X, iPoint.Y, 1);
                             var bor0 = new Point3D(iPoint.X, iPoint.Y, 0);
                             Triangle3D t11 = new Triangle3D(bor1, lowV1, in0);
                             Triangle3D t12 = new Triangle3D(bor0, lowV1, in1);
@@ -240,9 +239,7 @@ namespace TriangulationAndMore
                 bList.Add(b);
             }
         }
-
-
-
+        
         public List<double> DoKachmarz(List<List<double>> a, List<double> b)
         {
             // nn - количество неизвестных;  ny - количество уравнений
@@ -252,30 +249,33 @@ namespace TriangulationAndMore
             double s1, s2, fa1, t;
             double[] x1 = new double[b.Count];
             List<double> x = new List<double>();
-            x.Add(0.0);
-            for (i = 1; i < b.Count; i++) x.Add(0);
+            x.Add(double.Epsilon);
+            for (i = 1; i < b.Count; i++) x.Add(double.Epsilon);
 
-            s1 = s2 = 1;
+            s1 = s2 = 1d;
             while (s1 > eps * s2)
             {
                 for (i = 0; i < b.Count; i++) x1[i] = x[i];
 
                 for (i = 0; i < b.Count; i++)
                 {
-                    s1 = 0;
-                    s2 = 0;
+                    s1 = double.Epsilon;
+                    s2 = double.Epsilon;
                     for (j = 0; j < b.Count; j++)
                     {
                         fa1 = a[i][j];
                         s1 += fa1 * x[j];
                         s2 += fa1 * fa1;
                     }
-                    t = (b[i] - s1) / s2;
-                    for (k = 0; k < b.Count; k++) x[k] += (!double.IsNaN(a[i][k] * t)) ? a[i][k] * t: 0;
+                    t = Convert.ToDouble((double)(b[i] - s1) / s2);
+                    if (double.IsInfinity(t))
+                        t = (double)1000000;
+                    for (k = 0; k < b.Count; k++)
+                        x[k] += a[i][k] * t;
                 }
 
-                s1 = 0;
-                s2 = 0;
+                s1 = double.Epsilon;
+                s2 = double.Epsilon;
                 for (i = 0; i < b.Count; i++)
                 {
                     s1 += (x[i] - x1[i]) * (x[i] - x1[i]);
