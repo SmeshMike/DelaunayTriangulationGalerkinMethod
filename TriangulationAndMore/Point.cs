@@ -17,10 +17,13 @@ namespace TriangulationAndMore
         /// </summary>
         private readonly int _instanceId = _counter++;
 
-        public double X { get; }
-        public double Y { get; }
+        public double X { get; set; }
+        public double Y { get; set; }
         public bool IsBoundary { get; set; }
-        public HashSet<Triangle> AdjacentTriangles { get; } = new HashSet<Triangle>();
+
+        public bool IsInnerBoundaryMinus { get; set; }
+        public bool IsInnerBoundaryPlus { get; set; }
+        public HashSet<Triangle> AdjacentTriangles { get; set; } = new HashSet<Triangle>();
 
         public Point(double x, double y)
         {
@@ -32,6 +35,8 @@ namespace TriangulationAndMore
         public override string ToString()
         {
             // Simple way of seeing what's going on in the debugger when investigating weirdness
+
+            
             return $"{nameof(Point)} {_instanceId} {X:0.##}@{Y:0.##}";
         }
     }
