@@ -142,27 +142,47 @@ namespace TriangulationAndMore
                 var index2 = tmp.IndexOf(tmp.FirstOrDefault(point => point.X == triangle.Vertices[1].X && point.Y == triangle.Vertices[1].Y));
                 var index3 = tmp.IndexOf(tmp.FirstOrDefault(point => point.X == triangle.Vertices[2].X && point.Y == triangle.Vertices[2].Y));
                 Point3D p1;
+                //if (triangle.Vertices[0].IsInnerBoundaryPlus)
+                //    p1 = new Point3D(triangle.Vertices[0].X, minus, triangle.Vertices[0].Y);
+                //else if(triangle.Vertices[0].IsInnerBoundaryMinus)
+                //     p1 = new Point3D(triangle.Vertices[0].X, plus, triangle.Vertices[0].Y);
+                //else 
+                //     p1 = new Point3D(triangle.Vertices[0].X, fi[index1], triangle.Vertices[0].Y);
+                //Point3D p2;
+                //if (triangle.Vertices[1].IsInnerBoundaryPlus)
+                //    p2 = new Point3D(triangle.Vertices[1].X, minus, triangle.Vertices[1].Y);
+                //else if (triangle.Vertices[1].IsInnerBoundaryMinus)
+                //    p2 = new Point3D(triangle.Vertices[1].X, plus, triangle.Vertices[1].Y);
+                //else
+                //    p2 = new Point3D(triangle.Vertices[1].X, fi[index2], triangle.Vertices[1].Y);
+                //Point3D p3;
+                //if (triangle.Vertices[2].IsInnerBoundaryPlus)
+                //    p3 = new Point3D(triangle.Vertices[2].X, minus, triangle.Vertices[2].Y);
+                //else if (triangle.Vertices[2].IsInnerBoundaryMinus)
+                //    p3 = new Point3D(triangle.Vertices[2].X, plus, triangle.Vertices[2].Y);
+                //else
+                //    p3 = new Point3D(triangle.Vertices[2].X, fi[index3], triangle.Vertices[2].Y);
+
                 if (triangle.Vertices[0].IsInnerBoundaryPlus)
+                    p1 = new Point3D(triangle.Vertices[0].X, plus, triangle.Vertices[0].Y);
+                else if (triangle.Vertices[0].IsInnerBoundaryMinus)
                     p1 = new Point3D(triangle.Vertices[0].X, minus, triangle.Vertices[0].Y);
-                else if(triangle.Vertices[0].IsInnerBoundaryMinus)
-                     p1 = new Point3D(triangle.Vertices[0].X, plus, triangle.Vertices[0].Y);
-                else 
-                     p1 = new Point3D(triangle.Vertices[0].X, fi[index1], triangle.Vertices[0].Y);
+                else
+                    p1 = new Point3D(triangle.Vertices[0].X, fi[index1], triangle.Vertices[0].Y);
                 Point3D p2;
                 if (triangle.Vertices[1].IsInnerBoundaryPlus)
-                    p2 = new Point3D(triangle.Vertices[1].X, minus, triangle.Vertices[1].Y);
-                else if (triangle.Vertices[1].IsInnerBoundaryMinus)
                     p2 = new Point3D(triangle.Vertices[1].X, plus, triangle.Vertices[1].Y);
+                else if (triangle.Vertices[1].IsInnerBoundaryMinus)
+                    p2 = new Point3D(triangle.Vertices[1].X, minus, triangle.Vertices[1].Y);
                 else
                     p2 = new Point3D(triangle.Vertices[1].X, fi[index2], triangle.Vertices[1].Y);
                 Point3D p3;
                 if (triangle.Vertices[2].IsInnerBoundaryPlus)
-                    p3 = new Point3D(triangle.Vertices[2].X, minus, triangle.Vertices[2].Y);
-                else if (triangle.Vertices[2].IsInnerBoundaryMinus)
                     p3 = new Point3D(triangle.Vertices[2].X, plus, triangle.Vertices[2].Y);
+                else if (triangle.Vertices[2].IsInnerBoundaryMinus)
+                    p3 = new Point3D(triangle.Vertices[2].X, minus, triangle.Vertices[2].Y);
                 else
                     p3 = new Point3D(triangle.Vertices[2].X, fi[index3], triangle.Vertices[2].Y);
-
 
                 //Point3D p1 = new Point3D(triangle.Vertices[0].X, 0, triangle.Vertices[0].Y);
                 //Point3D p2 = new Point3D(triangle.Vertices[1].X, 0, triangle.Vertices[1].Y);

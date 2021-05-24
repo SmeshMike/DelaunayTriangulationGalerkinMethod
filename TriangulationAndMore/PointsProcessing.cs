@@ -222,7 +222,7 @@ namespace TriangulationAndMore
                             var m2 = new Point3D(lowerVertex[1].X, lowerVertex[1].Y, 0);
                             var m3 = new Point3D(iPoint.X, iPoint.Y, 1);
                             Triangle3D t3D = new Triangle3D(m1, m2, m3);
-                            a += (t3D.A * t3D.A + t3D.B * t3D.B) * t3D.S0;
+                            a -= (t3D.A * t3D.A + t3D.B * t3D.B) * t3D.S0;
                         }
                     }
                     else if (GetCommonTriangles(iPoint, jPoint).ToList().Count > 0 && !iPoint.IsBoundary && !jPoint.IsBoundary)
@@ -242,7 +242,7 @@ namespace TriangulationAndMore
                             Triangle3D t12 = new Triangle3D(bor0, lowV1, in1);
                             Triangle3D t21 = new Triangle3D(bor1, lowV2, in0);
                             Triangle3D t22 = new Triangle3D(bor0, lowV2, in1);
-                            a += (t11.A * t12.A + t11.B * t12.B) * t11.S0 + (t21.A * t22.A + t21.B * t22.B) * t21.S0;
+                            a -= (t11.A * t12.A + t11.B * t12.B) * t11.S0 + (t21.A * t22.A + t21.B * t22.B) * t21.S0;
                         }
                     }
 
@@ -301,6 +301,7 @@ namespace TriangulationAndMore
 
             return x;
         }
+
 
 
         private List<Edge> FindHoleBoundaries(ISet<Triangle> badTriangles)
