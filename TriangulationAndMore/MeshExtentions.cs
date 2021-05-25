@@ -113,6 +113,44 @@ namespace TriangulationAndMore
             return normals;
         }
 
+        public static MeshGeometry3D Lines(this MeshGeometry3D mesh,  double thickness)
+        {
+            // Make a mesh to hold the normals.
+            MeshGeometry3D lines = new MeshGeometry3D();
+
+            // Convert the normal vectors into segments.
+            for (int i = 0; i < mesh.Positions.Count; i++)
+            {
+
+                // Find the other end point.
+                Point3D endpoint = i == mesh.Positions.Count - 1 ? mesh.Positions[0] : mesh.Positions[i + 1];
+
+                // Create the segment.
+                AddSegment(lines, mesh.Positions[i], endpoint, thickness);
+            }
+
+            return lines;
+        }
+
+        public static MeshGeometry3D Lines2(this MeshGeometry3D mesh, double thickness)
+        {
+            // Make a mesh to hold the normals.
+            MeshGeometry3D lines = new MeshGeometry3D();
+
+            // Convert the normal vectors into segments.
+            for (int i = 0; i < mesh.Positions.Count-1; i++)
+            {
+
+                // Find the other end point.
+                Point3D endpoint = mesh.Positions[i + 1];
+
+                // Create the segment.
+                AddSegment(lines, mesh.Positions[i], endpoint, thickness);
+            }
+
+            return lines;
+        }
+
         public static Vector3D FindTriangleNormal(Point3D point1, Point3D point2, Point3D point3)
         {
             // Get two edge vectors.

@@ -12,6 +12,7 @@ namespace TriangulationAndMore
         public Point Circumcenter { get; private set; }
         public double RadiusSquared;
         public int BoundaryPointsCount;
+        public int SignBoundaryPointsCount;
 
         public ICollection<Triangle> TrianglesWithSharedEdge
         {
@@ -60,6 +61,7 @@ namespace TriangulationAndMore
                 Edges[2] = new Edge(point3, point1);
             }
             BoundaryPointsCount = Vertices.Count(point => point.IsBoundary);
+            SignBoundaryPointsCount = Vertices.Count(point => point.IsInnerBoundaryPlus) + Vertices.Count(point => point.IsInnerBoundaryMinus);
             Vertices[0].AdjacentTriangles.Add(this);
             Vertices[1].AdjacentTriangles.Add(this);
             Vertices[2].AdjacentTriangles.Add(this);

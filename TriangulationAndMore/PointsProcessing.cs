@@ -169,12 +169,12 @@ namespace TriangulationAndMore
             foreach (var iPoint in points)
             {
                 var b = double.Epsilon;
-                //var b =0.1d;
+                //var b =0.0d;
                 aList.Add(new List<double>());
                 foreach (var jPoint in points)
                 {
                     var a = double.Epsilon;
-                    //var a = 0.1d;
+                    //var a = 0.0d;
                     if (!iPoint.IsBoundary && jPoint.IsBoundary)
                     {
                         var commonTriangles = GetCommonTriangles(iPoint, jPoint).ToList();
@@ -206,6 +206,7 @@ namespace TriangulationAndMore
                             else
                             {
                                 c = double.Epsilon;
+                                
                             }
                             
                             
@@ -265,6 +266,7 @@ namespace TriangulationAndMore
             List<double> x = new List<double>();
             x.Add(double.Epsilon);
             for (i = 1; i < b.Count; i++) x.Add(double.Epsilon);
+           
 
             s1 = s2 = 1d;
             while (s1 > eps * s2)
@@ -275,6 +277,7 @@ namespace TriangulationAndMore
                 {
                     s1 = double.Epsilon;
                     s2 = double.Epsilon;
+
                     for (j = 0; j < b.Count; j++)
                     {
                         fa1 = a[i][j];
@@ -290,6 +293,7 @@ namespace TriangulationAndMore
 
                 s1 = double.Epsilon;
                 s2 = double.Epsilon;
+
                 for (i = 0; i < b.Count; i++)
                 {
                     s1 += (x[i] - x1[i]) * (x[i] - x1[i]);
@@ -302,7 +306,165 @@ namespace TriangulationAndMore
             return x;
         }
 
+        public List<List<Point>> GetIsolines(int n,  List<Triangle> triangles)
+        {
+            var z = triangles.Select(item => item.Vertices).ToList();
+            var z1 = z.SelectMany(item => item).ToList();
+            var maxFi = z1.Max(item => item.Fi);
+            var minFi = z1.Min(item => item.Fi);
+            var dFi = (maxFi - minFi) / (double)(n+1);
+            List<List<Point>> isolines = new List<List<Point>>();
+            for (int i = 0; i < n; i++)
+            {
+               isolines.Add(new List<Point>());
+                var fiLevel = minFi + (double)(i+1) * dFi;
+                foreach (var triangle in triangles)
+                {
+                    var fiList = triangle.Vertices.ToList();
+                    fiList.Sort((p1, p2) => p1.Fi.CompareTo(p2.Fi));
+                    if (!(fiLevel - fiList[2].Fi <0.2 ) || !(fiLevel - fiList[0].Fi >0.2)) continue;
+                    double x,y;
+                    if (fiLevel - fiList[1].Fi < 0.2)
+                    {
+                        x = fiList[1].X - (fiList[1].Fi - fiLevel) / (fiList[1].Fi - fiList[0].Fi) * (fiList[1].X - fiList[0].X);
+                        y = fiList[1].Y - (fiList[1].Fi - fiLevel) / (fiList[1].Fi - fiList[0].Fi) * (fiList[1].Y - fiList[0].Y);
+                    }
+                    else
+                    {
+                        x = fiList[2].X - (fiList[2].Fi - fiLevel) / (fiList[2].Fi - fiList[1].Fi) * (fiList[2].X - fiList[1].X);
+                        y = fiList[2].Y - (fiList[2].Fi - fiLevel) / (fiList[2].Fi - fiList[1].Fi) * (fiList[2].Y - fiList[1].Y);
+                    }
+                    isolines[i].Add(new Point(x,y,fiLevel));
 
+                }
+
+                var noduplicates = isolines[i].Distinct(new PointComparer()).ToList();
+                var newIsoline = new List<Point>();
+                newIsoline.Add(noduplicates.First());
+                foreach (var iPoint in noduplicates)
+                {
+                    Point point = new Point(0,0);
+                    double r = double.MaxValue;
+                    foreach (var jPoint in noduplicates)
+                    {
+                        
+                        if (iPoint != jPoint)
+                        {
+
+                            if (Math.Sqrt((iPoint.X - jPoint.X) * (iPoint.X - jPoint.X) + (iPoint.Y - jPoint.Y) * (iPoint.Y - jPoint.Y)) < r && !newIsoline.Contains(jPoint))
+                            {
+                                r = Math.Sqrt((iPoint.X - jPoint.X) * (iPoint.X - jPoint.X) + (iPoint.Y - jPoint.Y) * (iPoint.Y - jPoint.Y));
+                                point = jPoint;
+                            }
+                        }
+                    }
+                    if(newIsoline.Count<noduplicates.Count && point.X!=0&&point.Y!=0)
+                        newIsoline.Add(point);
+                }
+                isolines[i] = newIsoline;
+            }
+
+            return isolines;
+        }
+
+        public List<List<Point>> GetFieldlines(List<Triangle> triangles, List<Point> points, double maxX, double maxY, double fiMax, double coef)
+        {
+            List<List<Point>> fieldlines = new List<List<Point>>();
+            var boundaryPoints = triangles.Where(tri => tri.SignBoundaryPointsCount>0).Select(tri => tri.Circumcenter).ToList();
+            var usedTriangles = new List<Triangle>();
+            int i = 0;
+            foreach (var point in boundaryPoints)
+            {
+                Triangle t2d = new Triangle(new Point(0,10), new Point(10,20), point );
+                Triangle3D t3d = new Triangle3D(new Point3D(), new Point3D(), new Point3D());
+                var p1 = new Point3D(t2d.Vertices[0].X, t2d.Vertices[0].Y, t2d.Vertices[0].Fi);
+                var p2 = new Point3D(t2d.Vertices[1].X, t2d.Vertices[1].Y, t2d.Vertices[1].Fi);
+                var p3 = new Point3D(t2d.Vertices[2].X, t2d.Vertices[2].Y, t2d.Vertices[2].Fi);
+                fieldlines.Add(new List<Point>());
+                foreach (var triangle in triangles)
+                {
+                    if (!point.PointInTriangle(point, triangle.Vertices[0], triangle.Vertices[1], triangle.Vertices[2])) continue;
+                    t2d = triangle;
+                    usedTriangles.Add(t2d);
+                    p1 = new Point3D(t2d.Vertices[0].X, t2d.Vertices[0].Y, t2d.Vertices[0].Fi);
+                    p2 = new Point3D(t2d.Vertices[1].X, t2d.Vertices[1].Y, t2d.Vertices[1].Fi);
+                    p3 = new Point3D(t2d.Vertices[2].X, t2d.Vertices[2].Y, t2d.Vertices[2].Fi);
+
+                    t3d = new Triangle3D(p1, p2, p3);
+                    break;
+                }
+
+                bool intr = true;
+                var curX = point.X;
+                var curY = point.Y;
+                var curFi = -(t3d.A*curX + t3d.B * curY + t3d.D)/ t3d.C;
+                while (curX<=maxX/2&&curX>=-maxX/2&& curY <= maxY / 2 && curY >= -maxY / 2 && Math.Abs(curFi) <=fiMax*1.5)
+                {
+                    var addPoint = new Point(curX, curY, curFi);
+                    fieldlines[i].Add(addPoint);
+                    if(!intr)
+                        break;
+                    if (addPoint.PointInTriangle(addPoint, t2d.Vertices[0], t2d.Vertices[1], t2d.Vertices[2]))
+                    {
+                        Vector3D v1 = p2 - p1;
+                        Vector3D v2 = p3 - p2;
+
+                        // Get the cross product.
+                        Vector3D n = Vector3D.CrossProduct(v1, v2);
+                        n.Normalize();
+                        if (curFi < 0)
+                        {
+                            n.X = -n.X;
+                            n.Y = -n.Y;
+                            n.Z = -n.Z;
+                        }
+
+                        curX += coef * n.X;
+                        curY += coef * n.Y;
+                        curFi += coef * n.Z;
+
+                        //if (t3d.A * t3d.D < 0)
+                        //    curX += coef * Math.Abs(t3d.A);
+                        //else
+                        //    curX -= coef * Math.Abs(t3d.A);
+                        //if (t3d.B * t3d.D < 0)
+                        //    curY += coef * Math.Abs(t3d.B);
+                        //else
+                        //    curY -= coef * Math.Abs(t3d.B);
+                        //if (t3d.D > 0)
+                        //    curFi -= coef * Math.Abs(t3d.C);
+                        //else
+                        //    curFi += coef * Math.Abs(t3d.C);
+
+                        //if(coef * Math.Abs(t3d.C) < 0.00001)
+                        //    break;
+                    }
+                    else
+                    {
+                        intr = false;
+                        foreach (var triangle in triangles)
+                        {
+                            if (addPoint.PointInTriangle(addPoint, triangle.Vertices[0], triangle.Vertices[1], triangle.Vertices[2]))
+                            {
+                                t2d = triangle;
+                                p1 = new Point3D(t2d.Vertices[0].X, t2d.Vertices[0].Y, t2d.Vertices[0].Fi);
+                                p2 = new Point3D(t2d.Vertices[1].X, t2d.Vertices[1].Y, t2d.Vertices[1].Fi);
+                                p3 = new Point3D(t2d.Vertices[2].X, t2d.Vertices[2].Y, t2d.Vertices[2].Fi);
+                                t3d = new Triangle3D(p1, p2, p3);
+                                intr = true;
+                                break;
+                            }
+                        }
+                    }
+
+
+                }
+
+                ++i;
+            }
+
+            return fieldlines;
+        }
 
         private List<Edge> FindHoleBoundaries(ISet<Triangle> badTriangles)
         {
